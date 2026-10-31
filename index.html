@@ -116,6 +116,20 @@ html{min-height:100%;-webkit-text-size-adjust:100%}
 @media(max-width:360px){.main{padding:8px 8px max(8px,env(safe-area-inset-bottom))}.panel{padding:9px;border-radius:15px}.day{height:42px}.choice{height:50px}.selected-date{font-size:14px}}
 @media(max-height:700px){.main{padding-top:6px}.head{margin-bottom:6px}.panel{padding:9px;margin-bottom:6px}.day{height:39px}.choice{height:47px}.cal-head{margin-bottom:3px}.week{margin-bottom:1px}.summary-legend{margin-top:6px}}
 
+
+/* v1.2: balanced calendar rhythm on iPhone */
+.day{height:53px;padding:5px 0 4px;gap:5px}
+.day .mark{width:21px;height:21px}
+.week{margin-bottom:6px}
+.cal-head{margin-bottom:10px}
+.panel{padding:14px;margin-bottom:11px}
+.selector{margin-bottom:10px}
+.choice{height:59px}
+.summary-bar{height:15px}
+.summary-legend{margin-top:11px}
+@media(max-width:360px){.day{height:49px;padding:4px 0;gap:4px}.panel{padding:11px}.choice{height:54px}}
+@media(max-height:700px){.day{height:46px;padding:3px 0;gap:3px}.panel{padding:10px}.choice{height:50px}}
+
 </style>
 </head>
 <body>
