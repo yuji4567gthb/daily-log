@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#f5f6f8" />
+<title>Daily Log</title>
+<style>
+:root{
+  --bg:#f5f6f8;
+  --panel:#ffffff;
+  --panel-2:#f7f8fa;
+  --line:#e6e9ed;
+  --text:#222832;
+  --muted:#858e99;
+  --circle:#343a42;
+  --cross:#6c747e;
+  --triangle:#a0a7af;
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
+  color:var(--text);
+  background:var(--bg);
+  font-synthesis:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+button,input{font:inherit}
+button{cursor:pointer;border:0;background:none;color:inherit}
+button:focus-visible{outline:2px solid #6d86c2;outline-offset:2px}
+.main{max-width:520px;margin:0 auto;padding:20px 14px 34px}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.title{font-size:28px;font-weight:800;letter-spacing:-.06em;margin:0}
+.head-actions{display:flex;gap:8px}
+.chip{height:36px;padding:0 12px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:700}
+.panel{background:linear-gradient(180deg,#ffffff,#ffffff);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:0 10px 28px rgba(29,40,55,.035)}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.month{font-size:22px;font-weight:800;letter-spacing:-.03em}
+.nav{display:flex;gap:8px}
+.nav-btn{width:36px;height:36px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);font-size:20px;line-height:1}
+.nav-btn.today{width:auto;padding:0 12px;font-size:12px;font-weight:700;color:var(--muted)}
+.week,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.week{margin-bottom:10px}
+.week div{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:4px 0}
+.day{position:relative;min-width:0;height:68px;border-radius:16px;background:transparent;border:1px solid transparent;padding:7px 0 6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px}
+.day:not(.blank):active{background:#f0f2f5}
+.day.selected{background:#edf1f5;border-color:#bac5d2}
+.day.current .num{background:#303842;color:white}
+.day.blank{pointer-events:none}
+.num{width:22px;height:22px;border-radius:999px;display:grid;place-items:center;font-size:12px;font-weight:700;color:#404852}
+.mark{display:block;flex:0 0 auto;width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.mark.circle{color:var(--circle)}
+.mark.cross{color:var(--cross)}
+.mark.triangle{color:var(--triangle)}
+.selector{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.selected-date{font-size:18px;font-weight:800;letter-spacing:-.02em}
+.clear{width:40px;height:40px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);color:var(--muted);font-size:18px}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.choice{height:86px;border-radius:18px;background:var(--panel-2);border:1px solid var(--line);display:grid;place-items:center;transition:.15s ease}
+.choice .mark{width:36px;height:36px;stroke-width:2.35}
+.choice.active{transform:translateY(-1px)}
+.choice.active.circle-choice{border-color:#a4abb4;background:#e9edf1}
+.choice.active.cross-choice{border-color:#a4abb4;background:#e9edf1}
+.choice.active.triangle-choice{border-color:#a4abb4;background:#e9edf1}
+/* Single monochrome proportional summary bar */
+.summary-bar{display:flex;width:100%;height:22px;overflow:hidden;border-radius:7px;background:#eef0f2}
+.summary-segment{height:100%;width:0;transition:width .2s ease}
+.summary-segment.circle{background:#343a42}
+.summary-segment.cross{background:#858c95}
+.summary-segment.triangle{background:#c6cbd1}
+.summary-legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:18px}
+.summary-item{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0}
+.summary-item .mark{width:19px;height:19px;stroke-width:2.6}
+.summary-item strong{font-size:17px;line-height:1.2;font-weight:750;font-variant-numeric:tabular-nums}
+.summary-item small{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.toolbar{display:flex;gap:8px;margin-top:4px}
+.action{flex:1;height:44px;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-size:13px;font-weight:700;color:#48515c}
+input[type=file]{display:none}
+@media(max-width:360px){
+  .main{padding:16px 10px 28px}
+  .panel{padding:12px;border-radius:18px}
+  .day{height:60px}
+  .choice{height:78px}
+  .selected-date{font-size:16px}
+}
+</style>
+</head>
+<body>
+<main class="main">
+  <header class="head">
+    <h1 class="title">Daily Log</h1>
+    <div class="head-actions">
+      <button class="chip" id="export" type="button">保存</button>
+      <button class="chip" id="import" type="button">復元</button>
+      <input id="file" type="file" accept=".json,application/json" />
+    </div>
+  </header>
+
+  <section class="panel" aria-label="記録カレンダー">
+    <div class="cal-head">
+      <div class="month" id="monthLabel"></div>
+      <div class="nav">
+        <button class="nav-btn" id="prev" type="button" aria-label="前の月">‹</button>
+        <button class="nav-btn today" id="goToday" type="button">今月</button>
+        <button class="nav-btn" id="next" type="button" aria-label="次の月">›</button>
+      </div>
+    </div>
+    <div class="week"><div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div></div>
+    <div class="days" id="days"></div>
+  </section>
+
+  <section class="panel" aria-label="結果を入力">
+    <div class="selector">
+      <div class="selected-date" id="selectedLabel"></div>
+      <button class="clear" id="clear" type="button" aria-label="記録を消す">⌫</button>
+    </div>
+    <div class="choices">
+      <button class="choice circle-choice" type="button" data-mark="circle" aria-label="まる"><svg class="mark circle" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/></svg></button>
+      <button class="choice cross-choice" type="button" data-mark="cross" aria-label="ばつ"><svg class="mark cross" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 5.5 18.5 18.5 M18.5 5.5 5.5 18.5"/></svg></button>
+      <button class="choice triangle-choice" type="button" data-mark="triangle" aria-label="さんかく"><svg class="mark triangle" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6 21 19.6a1.1 1.1 0 0 1-1 1.7H4a1.1 1.1 0 0 1-1-1.7L12 3.6Z"/></svg></button>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="今月の集計">
+    <div class="summary-bar" id="summaryBar" role="img" aria-label="今月の記録割合">
+      <div class="summary-segment circle" id="barCircle"></div>
+      <div class="summary-segment cross" id="barCross"></div>
+      <div class="summary-segment triangle" id="barTriangle"></div>
+    </div>
+    <div class="summary-legend">
+      <div class="summary-item"><svg class="mark circle" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/></svg><strong id="pctCircle">0%</strong><small id="countCircle">0</small></div>
+      <div class="summary-item"><svg class="mark cross" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 5.5 18.5 18.5 M18.5 5.5 5.5 18.5"/></svg><strong id="pctCross">0%</strong><small id="countCross">0</small></div>
+      <div class="summary-item"><svg class="mark triangle" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.6 21 19.6a1.1 1.1 0 0 1-1 1.7H4a1.1 1.1 0 0 1-1-1.7L12 3.6Z"/></svg><strong id="pctTriangle">0%</strong><small id="countTriangle">0</small></div>
+    </div>
+  </section>
+</main>
+<script>
+(()=>{'use strict';
+const STORAGE_KEY='daily-marks-calendar-v2';
+const MARKS=['circle','cross','triangle'];
+let data={};
+try{
+  const stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+  if(stored && typeof stored==='object' && !Array.isArray(stored)) data=stored;
+}catch{}
+const now=new Date();
+let year=now.getFullYear();
+let month=now.getMonth();
+let selected=dateKey(now.getFullYear(),now.getMonth(),now.getDate());
+const $=id=>document.getElementById(id);
+function dateKey(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
+function parseSelected(){return selected.split('-').map(Number)}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}
+function iconSpan(type){
+  const ns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('class',`mark ${type}`);
+  svg.setAttribute('viewBox','0 0 24 24');
+  svg.setAttribute('aria-hidden','true');
+  const shape=document.createElementNS(ns,type==='circle'?'circle':'path');
+  if(type==='circle'){shape.setAttribute('cx','12');shape.setAttribute('cy','12');shape.setAttribute('r','8.5')}
+  else shape.setAttribute('d',type==='cross'?'M5.5 5.5 18.5 18.5 M18.5 5.5 5.5 18.5':'M12 3.6 21 19.6a1.1 1.1 0 0 1-1 1.7H4a1.1 1.1 0 0 1-1-1.7L12 3.6Z');
+  svg.append(shape);return svg;
+}
+function render(){
+  $('monthLabel').textContent=`${year}年 ${month+1}月`;
+  const daysEl=$('days');
+  daysEl.replaceChildren();
+  const firstDay=new Date(year,month,1).getDay();
+  const totalDays=new Date(year,month+1,0).getDate();
+  for(let i=0;i<firstDay;i++){
+    const blank=document.createElement('div');
+    blank.className='day blank';
+    daysEl.append(blank);
+  }
+  const todayKey=dateKey(now.getFullYear(),now.getMonth(),now.getDate());
+  for(let d=1;d<=totalDays;d++){
+    const key=dateKey(year,month,d);
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='day'+(selected===key?' selected':'')+(key===todayKey?' current':'');
+    btn.setAttribute('aria-label',`${month+1}月${d}日`);
+    const num=document.createElement('span');
+    num.className='num';
+    num.textContent=d;
+    btn.append(num);
+    const mark=data[key];
+    if(MARKS.includes(mark)) btn.append(iconSpan(mark));
+    btn.addEventListener('click',()=>{selected=key;render()});
+    daysEl.append(btn);
+  }
+  const [sy,sm,sd]=parseSelected();
+  $('selectedLabel').textContent=`${sy}.${String(sm).padStart(2,'0')}.${String(sd).padStart(2,'0')}`;
+  document.querySelectorAll('[data-mark]').forEach(btn=>{
+    const active=data[selected]===btn.dataset.mark;
+    btn.classList.toggle('active',active);
+    btn.setAttribute('aria-pressed',String(active));
+  });
+  const counts=MARKS.map(type=>countMarks(type,totalDays));
+  const recorded=counts.reduce((sum,n)=>sum+n,0);
+  const names=['Circle','Cross','Triangle'];
+  MARKS.forEach((type,i)=>{
+    const pct=recorded?100*counts[i]/recorded:0;
+    $('bar'+names[i]).style.width=`${pct}%`;
+    $('pct'+names[i]).textContent=`${Math.round(pct)}%`;
+    $('count'+names[i]).textContent=String(counts[i]);
+  });
+  $('summaryBar').setAttribute('aria-label',`記録済み${recorded}日。丸${counts[0]}日、ばつ${counts[1]}日、さんかく${counts[2]}日`);
+}
+function countMarks(type,totalDays){
+  let count=0;
+  for(let d=1;d<=totalDays;d++) if(data[dateKey(year,month,d)]===type) count++;
+  return count;
+}
+function moveMonth(delta){
+  const next=new Date(year,month+delta,1);
+  year=next.getFullYear();
+  month=next.getMonth();
+  const day=Math.min(parseSelected()[2],new Date(year,month+1,0).getDate());
+  selected=dateKey(year,month,day);
+  render();
+}
+$('prev').addEventListener('click',()=>moveMonth(-1));
+$('next').addEventListener('click',()=>moveMonth(1));
+$('goToday').addEventListener('click',()=>{
+  year=now.getFullYear();month=now.getMonth();selected=dateKey(now.getFullYear(),now.getMonth(),now.getDate());render();
+});
+document.querySelectorAll('[data-mark]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    data[selected]=btn.dataset.mark;
+    save();
+    render();
+  });
+});
+$('clear').addEventListener('click',()=>{
+  delete data[selected];
+  save();
+  render();
+});
+$('export').addEventListener('click',()=>{
+  const payload={app:'daily-marks-calendar',version:2,exportedAt:new Date().toISOString(),records:data};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`daily-marks-backup-${dateKey(now.getFullYear(),now.getMonth(),now.getDate())}.json`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+$('import').addEventListener('click',()=>$('file').click());
+$('file').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];
+  if(!file) return;
+  try{
+    const json=JSON.parse(await file.text());
+    const records=json.records;
+    if(!records || typeof records!=='object' || Array.isArray(records)) throw new Error('invalid');
+    const cleaned={};
+    for(const [k,v] of Object.entries(records)){
+      if(/^\d{4}-\d{2}-\d{2}$/.test(k) && MARKS.includes(v)) cleaned[k]=v;
+    }
+    if(!confirm(`${Object.keys(cleaned).length}件の記録を復元します。上書きしますか？`)) return;
+    data=cleaned;
+    save();
+    render();
+  }catch{
+    alert('ファイルを読み込めませんでした');
+  }finally{
+    e.target.value='';
+  }
+});
+render();
+})();
+</script>
+</body>
+</html>
