@@ -81,6 +81,41 @@ input[type=file]{display:none}
   .choice{height:78px}
   .selected-date{font-size:16px}
 }
+
+/* v1.1: compact iPhone viewport layout; retain the existing data key. */
+html{min-height:100%;-webkit-text-size-adjust:100%}
+.main{max-width:520px;padding:10px 12px max(10px,env(safe-area-inset-bottom));}
+.head{margin-bottom:9px}
+.title{font-size:24px;line-height:1.12}
+.head-actions{gap:5px}
+.chip{height:30px;padding:0 10px;font-size:11px}
+.panel{padding:12px;margin-bottom:9px;border-radius:17px;box-shadow:none}
+.cal-head{margin-bottom:7px}
+.month{font-size:18px}
+.nav{gap:5px}
+.nav-btn{width:30px;height:30px;border-radius:9px;font-size:17px}
+.nav-btn.today{padding:0 9px;font-size:11px}
+.week,.days{gap:2px}
+.week{margin-bottom:3px}
+.week div{font-size:10px;padding:2px 0}
+.day{height:45px;border-radius:10px;padding:2px 0;gap:2px}
+.num{width:18px;height:18px;font-size:11px}
+.day .mark{width:20px;height:20px;stroke-width:2.65}
+.selector{margin-bottom:8px}
+.selected-date{font-size:15px}
+.clear{width:30px;height:30px;border-radius:9px;font-size:16px}
+.choices{gap:8px}
+.choice{height:54px;border-radius:12px}
+.choice .mark{width:27px;height:27px}
+.summary-bar{height:13px;border-radius:5px}
+.summary-legend{margin-top:9px;gap:3px}
+.summary-item{gap:5px}
+.summary-item .mark{width:16px;height:16px}
+.summary-item strong{font-size:13px}
+.summary-item small{font-size:10px}
+@media(max-width:360px){.main{padding:8px 8px max(8px,env(safe-area-inset-bottom))}.panel{padding:9px;border-radius:15px}.day{height:42px}.choice{height:50px}.selected-date{font-size:14px}}
+@media(max-height:700px){.main{padding-top:6px}.head{margin-bottom:6px}.panel{padding:9px;margin-bottom:6px}.day{height:39px}.choice{height:47px}.cal-head{margin-bottom:3px}.week{margin-bottom:1px}.summary-legend{margin-top:6px}}
+
 </style>
 </head>
 <body>
